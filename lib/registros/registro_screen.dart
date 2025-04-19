@@ -6,6 +6,7 @@ import 'package:movil_jmas_reg/app_drawer.dart';
 import 'package:movil_jmas_reg/controllers/lectenviar_controller.dart';
 import 'package:movil_jmas_reg/controllers/problemas_controller.dart';
 import 'package:movil_jmas_reg/widgets/device_utils.dart';
+import 'package:movil_jmas_reg/widgets/mensajes.dart';
 import 'package:path_provider/path_provider.dart';
 
 class RegistroScreen extends StatefulWidget {
@@ -134,6 +135,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
 
   Future<void> _savedLectura() async {
     if (!_hasTakenPhoto && _imageFile == null) {
+      showAdvertence(context, 'Debes tomar una foto antes de guardar.');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Debes tomar una foto antes de guardar')),
       );
@@ -156,16 +158,13 @@ class _RegistroScreenState extends State<RegistroScreen> {
       );
 
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registro guardado exitosamente')),
-        );
+        showOk(context, 'Registro guardado exitosamente.');
         setState(() {
           _allLecturas[_currentIndex] = currentLecura;
+          _loadData();
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al guardar el registro')),
-        );
+        showError(context, 'Error al guardar el registro.');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -262,182 +261,188 @@ class _RegistroScreenState extends State<RegistroScreen> {
         ),
       ),
       drawer: const AppDrawer(),
-      body:
-          _isLoading
-              ? Center(
-                child: CircularProgressIndicator(color: Colors.green.shade900),
-              )
-              : Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Registro ${_currentIndex + 1} de ${_allLecturas.length}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+      body: Container(
+        decoration: BoxDecoration(gradient: _getBackGroundColor()),
+        child:
+            _isLoading
+                ? Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.green.shade900,
+                  ),
+                )
+                : Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Registro ${_currentIndex + 1} de ${_allLecturas.length}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 15),
-                      Container(
-                        height: _hasTakenPhoto ? 400 : 50,
-                        width: _hasTakenPhoto ? 200 : 50,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
+                        const SizedBox(height: 15),
+                        Container(
+                          height: _hasTakenPhoto ? 400 : 50,
+                          width: _hasTakenPhoto ? 200 : 50,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: _buildImageWidget(),
                         ),
-                        child: _buildImageWidget(),
-                      ),
-                      const SizedBox(height: 15),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: TextField(
-                              controller: _cuenta,
-                              decoration: const InputDecoration(
-                                labelText: 'Cuenta',
-                                border: OutlineInputBorder(),
+                        const SizedBox(height: 15),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: TextField(
+                                controller: _cuenta,
+                                decoration: const InputDecoration(
+                                  labelText: 'Cuenta',
+                                  border: OutlineInputBorder(),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 15),
-                          Expanded(
-                            flex: 1,
-                            child: TextField(
-                              controller: _ruta,
-                              decoration: const InputDecoration(
-                                labelText: 'Ruta',
-                                border: OutlineInputBorder(),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              flex: 1,
+                              child: TextField(
+                                controller: _ruta,
+                                decoration: const InputDecoration(
+                                  labelText: 'Ruta',
+                                  border: OutlineInputBorder(),
+                                ),
                               ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        //Nombre
+                        TextField(
+                          controller: _nombre,
+                          decoration: const InputDecoration(
+                            labelText: 'Nombre',
+                            border: OutlineInputBorder(),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 15),
-                      //Nombre
-                      TextField(
-                        controller: _nombre,
-                        decoration: const InputDecoration(
-                          labelText: 'Nombre',
-                          border: OutlineInputBorder(),
                         ),
-                      ),
-                      const SizedBox(height: 15),
-                      TextField(
-                        controller: _direccion,
-                        decoration: const InputDecoration(
-                          labelText: 'Dirección',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      TextField(
-                        controller: _medidor,
-                        decoration: const InputDecoration(
-                          labelText: 'Medidor',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              'Promedio: ${_promedio.text}',
-                              style: const TextStyle(fontSize: 17),
-                            ),
+                        const SizedBox(height: 15),
+                        TextField(
+                          controller: _direccion,
+                          decoration: const InputDecoration(
+                            labelText: 'Dirección',
+                            border: OutlineInputBorder(),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            flex: 1,
-                            child: TextField(
-                              controller: _lActual,
-                              decoration: const InputDecoration(
-                                labelText: 'L. Actual',
-                                border: OutlineInputBorder(),
+                        ),
+                        const SizedBox(height: 15),
+                        TextField(
+                          controller: _medidor,
+                          decoration: const InputDecoration(
+                            labelText: 'Medidor',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: Text(
+                                'Promedio: ${_promedio.text}',
+                                style: const TextStyle(fontSize: 17),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 15),
-                      DropdownButtonFormField<Problemas>(
-                        value: _selectedProblema,
-                        decoration: const InputDecoration(
-                          labelText: 'Problema',
-                          border: OutlineInputBorder(),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              flex: 1,
+                              child: TextField(
+                                controller: _lActual,
+                                decoration: const InputDecoration(
+                                  labelText: 'L. Actual',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        items:
-                            _problemasList.map((Problemas problema) {
-                              return DropdownMenuItem<Problemas>(
-                                value: problema,
-                                child: Text(problema.descripcionProb ?? ''),
-                              );
-                            }).toList(),
-                        onChanged: (Problemas? newValue) {
-                          setState(() {
-                            _selectedProblema = newValue;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      //Navegación
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back_ios_rounded),
-                            onPressed: _isFirstRecord ? null : _previusLectura,
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.all(16),
-                            ),
+                        const SizedBox(height: 15),
+                        DropdownButtonFormField<Problemas>(
+                          value: _selectedProblema,
+                          decoration: const InputDecoration(
+                            labelText: 'Problema',
+                            border: OutlineInputBorder(),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.save),
-                            onPressed: _hasTakenPhoto ? _savedLectura : null,
-                            style: IconButton.styleFrom(
-                              backgroundColor:
-                                  _hasTakenPhoto ? Colors.green : Colors.grey,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.all(16),
+                          items:
+                              _problemasList.map((Problemas problema) {
+                                return DropdownMenuItem<Problemas>(
+                                  value: problema,
+                                  child: Text(problema.descripcionProb ?? ''),
+                                );
+                              }).toList(),
+                          onChanged: (Problemas? newValue) {
+                            setState(() {
+                              _selectedProblema = newValue;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        //Navegación
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back_ios_rounded),
+                              onPressed:
+                                  _isFirstRecord ? null : _previusLectura,
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.all(16),
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.arrow_forward),
-                            onPressed: _isLastRecord ? null : _nextLectura,
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.all(16),
+                            IconButton(
+                              icon: const Icon(Icons.save),
+                              onPressed: _hasTakenPhoto ? _savedLectura : null,
+                              style: IconButton.styleFrom(
+                                backgroundColor:
+                                    _hasTakenPhoto ? Colors.green : Colors.grey,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.all(16),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.camera_alt),
-                            onPressed: _takePhoto,
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.all(16),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_forward),
+                              onPressed: _isLastRecord ? null : _nextLectura,
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.all(16),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.camera_alt),
+                              onPressed: _takePhoto,
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.all(16),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+      ),
     );
   }
 
@@ -518,5 +523,40 @@ class _RegistroScreenState extends State<RegistroScreen> {
         ],
       ),
     );
+  }
+
+  // Agrega estas variables en tu clase _RegistroScreenState
+  final Gradient _gradienteVerde = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      const Color.fromARGB(255, 255, 255, 255).withOpacity(0.9),
+      const Color.fromARGB(255, 179, 243, 105).withOpacity(0.6),
+      const Color.fromARGB(255, 136, 255, 0).withOpacity(0.3),
+    ],
+  );
+
+  final Gradient _gradienteNaranja = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      const Color.fromARGB(255, 255, 255, 255).withOpacity(0.9),
+      const Color.fromARGB(255, 231, 205, 181).withOpacity(0.6),
+      const Color(0xFFFF9800).withOpacity(0.3),
+    ],
+  );
+
+  final Gradient _gradienteDefault = LinearGradient(
+    colors: [Colors.white, Colors.white],
+  );
+
+  Gradient _getBackGroundColor() {
+    if (_allLecturas.isNotEmpty && _currentIndex < _allLecturas.length) {
+      final currentLectura = _allLecturas[_currentIndex];
+      return currentLectura.estado == true
+          ? _gradienteVerde
+          : _gradienteNaranja;
+    }
+    return _gradienteDefault;
   }
 }
