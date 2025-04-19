@@ -9,14 +9,16 @@ class LectenviarController {
 
   Future<List<LectEnviar>> listLecturas() async {
     try {
-      final client = HttpClient()
-        ..badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
+      final client =
+          HttpClient()
+            ..badCertificateCallback =
+                (X509Certificate cert, String host, int port) => true;
 
-      final request =
-          await client.getUrl(Uri.parse('${_authService.apiURL}/LectEnviars'));
+      final request = await client.getUrl(
+        Uri.parse('${_authService.apiURL}/LectEnviars'),
+      );
 
-      request.headers.add('Content-Type', 'application/json');
+      request.headers.add('Content-Type', 'application/json; charset=UTF-8');
 
       final response = await request.close();
       final responseBody = await response.transform(utf8.decoder).join();
@@ -41,14 +43,16 @@ class LectenviarController {
 
   Future<bool> updateLectura(LectEnviar lectura, File? imageFile) async {
     try {
-      final client = HttpClient()
-        ..badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
+      final client =
+          HttpClient()
+            ..badCertificateCallback =
+                (X509Certificate cert, String host, int port) => true;
 
-      final request = await client.putUrl(Uri.parse(
-          '${_authService.apiURL}/LectEnviars/${lectura.idLectEnviar}'));
+      final request = await client.putUrl(
+        Uri.parse('${_authService.apiURL}/LectEnviars/${lectura.idLectEnviar}'),
+      );
 
-      request.headers.add('Content-Type', 'application/json');
+      request.headers.add('Content-Type', 'application/json; charset=UTF-8');
 
       String? img64;
       if (imageFile != null) {
@@ -79,7 +83,8 @@ class LectenviarController {
       } else {
         // ignore: avoid_print
         print(
-            'Error al actualizar registro | Update | Ife: ${response.statusCode} - $responseBody');
+          'Error al actualizar registro | Update | Ife: ${response.statusCode} - $responseBody',
+        );
         return false;
       }
     } catch (e) {
